@@ -30,7 +30,7 @@ const https = require('https');
 // --- MIDDLEWARE ---
 // Add your future Vercel/Netlify URL here once you have it
 const allowedOrigins = [
-  'http://localhost:3000',
+  'https://career-ai-recommendation.netlify.app/',
   'https://your-frontend-name.vercel.app', // placeholder for now
   'https://your-frontend-name.netlify.app' // placeholder for now
 ];
@@ -169,14 +169,14 @@ passport.deserializeUser(async (id, done) => {
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 app.get('/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: 'http://localhost:3000/' }),
+    passport.authenticate('google', { failureRedirect: 'https://career-ai-recommendation.netlify.app/' }),
     async (req, res) => {
         try {
             const jwtToken = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET || 'secret_key', { expiresIn: '24h' });
             const userData = encodeURIComponent(JSON.stringify({ id: req.user._id, name: req.user.name, email: req.user.email }));
-            res.redirect(`http://localhost:3000/home?token=${jwtToken}&user=${userData}`);
+            res.redirect(`https://career-ai-recommendation.netlify.app/home?token=${jwtToken}&user=${userData}`);
         } catch (error) {
-            res.redirect('http://localhost:3000/?error=auth_failed');
+            res.redirect('https://career-ai-recommendation.netlify.app/?error=auth_failed');
         }
     }
 );

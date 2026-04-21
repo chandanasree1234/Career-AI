@@ -87,10 +87,6 @@ const Layout = ({ children }) => {
           </Link>
 
           {/* NEW: Added Resume Tailor Link */}
-          <Link to="/resume-tailor" className="nav-item">
-            <span className="nav-icon">📄</span> 
-            {!isCollapsed && <span>Resume Tailor</span>}
-          </Link>
 
           <Link to="/chat" className="nav-item">
             <span className="nav-icon">💬</span> 
@@ -103,6 +99,10 @@ const Layout = ({ children }) => {
           <Link to="/analysis" className="nav-item">
             <span className="nav-icon">📈</span> 
             {!isCollapsed && <span>Skill Analysis</span>}
+          </Link>
+          <Link to="/resume-tailor" className="nav-item">
+            <span className="nav-icon">📄</span> 
+            {!isCollapsed && <span>Resume Tailor</span>}
           </Link>
           <Link to="/interview" className="nav-item">
             <span className="nav-icon">🎤</span> 
