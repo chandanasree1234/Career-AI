@@ -30,34 +30,34 @@ const https = require('https');
 // --- MIDDLEWARE ---
 // Add your future Vercel/Netlify URL here once you have it
 const allowedOrigins = [
-  'https://career-ai-recommendation.netlify.app/',
-  'https://your-frontend-name.vercel.app', // placeholder for now
-  'https://your-frontend-name.netlify.app' // placeholder for now
+  'http://localhost:3000',
+  'https://career-ai-recommendation.netlify.app' // ADD YOUR NETLIFY URL HERE
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow local development and your specific production frontend
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS blocked: This origin is not allowed.'));
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS blocked this origin'), false);
     }
+    return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
-
 app.use(session({
-    secret: process.env.JWT_SECRET || 'career_ai_secret',
-    resave: false,
-    saveUninitialized: false, // Changed to false for better security
-    cookie: {
-        sameSite: 'none', 
-        secure: true,      // Must be true because Render uses HTTPS
-        maxAge: 24 * 60 * 60 * 1000 
-    }
+  secret: process.env.SESSION_SECRET || 'your_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    sameSite: 'none', // Required for cross-domain (Netlify to Render)
+    secure: true,     // Required for 'none'
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
