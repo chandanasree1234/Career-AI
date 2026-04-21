@@ -52,9 +52,13 @@ app.use(express.json());
 app.use(session({
     secret: process.env.JWT_SECRET || 'career_ai_secret',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false, // Changed to false for better security
+    cookie: {
+        sameSite: 'none', 
+        secure: true,      // Must be true because Render uses HTTPS
+        maxAge: 24 * 60 * 60 * 1000 
+    }
 }));
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -201,34 +205,64 @@ app.get('/api/history/:id', protect, async (req, res) => {
 app.post('/api/recommend', protect, async (req, res) => {
     const { skills } = req.body; 
     const scriptPath = path.join(__dirname, '..', 'ai_logic', 'model.py');
-    const pythonExecutable = '/usr/bin/python3'; 
-
-    const pythonProcess = spawn(pythonExecutable, [scriptPath, skills]);
+    
+    // SAFE: Use 'python3' directly or process.env.PYTHON_PATH
+    const pythonProcess = spawn('python3', [scriptPath, skills]);
+    
     let aiData = "";
     let pythonError = "";
+
+    // CRITICAL: Handle spawn errors so the server doesn't crash
+    pythonProcess.on('error', (err) => {
+        console.error("Failed to start Python process:", err);
+        return res.status(500).json({ error: "AI process could not start" });
+    });
 
     pythonProcess.stdout.on('data', (data) => aiData += data.toString());
     pythonProcess.stderr.on('data', (data) => pythonError += data.toString());
 
     pythonProcess.on('close', async (code) => {
-        if (code !== 0) return res.status(500).json({ error: "AI Engine Error" });
+        if (code !== 0) {
+            console.error("Python Error:", pythonError);
+            return res.status(500).json({ error: "AI Engine Error" });
+        }
+
         const recommendedRole = aiData.trim();
+        
+        // Ensure calculateGaps exists in this scope
         const { missing, steps } = calculateGaps(skills, recommendedRole);
+
         try {
-            const newSearch = new Career({ userId: req.user.id, skills, recommendation: recommendedRole, missingSkills: missing, roadmapSteps: steps, matchScore: 85 });
+            // Using req.user._id as a backup to req.user.id
+            const userId = req.user.id || req.user._id;
+            
+            const newSearch = new Career({ 
+                userId, 
+                skills, 
+                recommendation: recommendedRole, 
+                missingSkills: missing, 
+                roadmapSteps: steps, 
+                matchScore: 85 
+            });
+
             const savedRecord = await newSearch.save();
             res.json(savedRecord);
-        } catch (dbError) { res.status(500).json({ error: "Database save failed" }); }
+        } catch (dbError) { 
+            console.error("DB Error:", dbError);
+            res.status(500).json({ error: "Database save failed" }); 
+        }
     });
 });
 
 // NEW: AI Resume Tailor Route
 app.post('/api/resume/analyze', protect, async (req, res) => {
     const { resumeText, jdText } = req.body;
+    
+    // 1. Dynamic Pathing
     const scriptPath = path.join(__dirname, '..', 'ai_logic', 'resume_analyzer.py');
-    const pythonExecutable = '/usr/bin/python3'; 
-
-    const pythonProcess = spawn(pythonExecutable, [scriptPath, resumeText, jdText]);
+    
+    // On Render, 'python3' is the standard command
+    const pythonProcess = spawn('python3', [scriptPath, resumeText, jdText]);
     
     let aiData = "";
     let pythonError = "";
@@ -239,21 +273,29 @@ app.post('/api/resume/analyze', protect, async (req, res) => {
     pythonProcess.on('close', async (code) => {
         if (code !== 0) {
             console.error("Python Error:", pythonError);
-            return res.status(500).json({ error: "AI Analysis Failed" });
+            return res.status(500).json({ error: "AI Analysis Failed", details: pythonError });
         }
 
         try {
-            const result = JSON.parse(aiData);
+            // 2. Clean the string before parsing to avoid hidden characters
+            const cleanedData = aiData.trim();
+            const result = JSON.parse(cleanedData);
+
+            // 3. ID Check: use req.user._id if req.user.id is undefined
+            const userId = req.user.id || req.user._id;
+
             const newAnalysis = new Resume({
-                userId: req.user.id,
+                userId: userId,
                 matchScore: result.matchScore,
                 missingKeywords: result.missingKeywords,
                 suggestions: result.suggestions
             });
+
             await newAnalysis.save();
             res.json(newAnalysis);
         } catch (err) {
-            res.status(500).json({ error: "Data processing error" });
+            console.error("Parsing Error:", err, "Raw Data:", aiData);
+            res.status(500).json({ error: "Data processing error", raw: aiData });
         }
     });
 });
