@@ -1,0 +1,289 @@
+/* --- Global Styles & Variables --- */
+:root {
+  --primary: #38bdf8;
+  --bg-dark: #020617;      
+  --card-bg: rgba(15, 23, 42, 0.6); 
+  --emerald: #34d399;      
+  --slate-border: rgba(30, 41, 59, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+}
+
+/* --- Professional AI Dashboard Core --- */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(at top left, rgba(52, 211, 153, 0.1) 0%, transparent 40%),
+    radial-gradient(at bottom right, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+  color: white;
+}
+
+/* --- Sidebar Styling --- */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid var(--slate-border);
+  display: flex;
+  flex-direction: column; 
+  padding: 2rem 1rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1.0rem;
+}
+
+.toggle-btn {
+  background: rgba(56, 189, 248, 0.1); 
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: var(--primary);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.toggle-btn:hover {
+  background: var(--primary);
+  color: var(--bg-dark);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  transform: scale(1.1);
+}
+
+/* --- Navigation & Sidebar Elements --- */
+.sidebar-nav { display: flex; flex-direction: column; gap: 0px; padding: 20px 0; flex-grow: 1; }
+
+.nav-item {
+  display: flex;         
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #94a3b8;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;   
+}
+
+.nav-item:hover {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--primary);
+  transform: translateX(5px);
+}
+
+.logout-btn-sidebar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px; 
+  padding: 12px 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+/* --- Main Content Area --- */
+.main-content {
+  flex-grow: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+/* --- NEW: Modern Input Field (Resume Tailor & Search) --- */
+.modern-input-field {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: white;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s ease;
+  line-height: 1.5;
+}
+
+.modern-input-field:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.1);
+  background: #111b2e;
+}
+
+/* --- HERO SECTION --- */
+.home-wrapper {
+  width: 100%;
+  height: 90%;
+  overflow: hidden;
+}
+
+.hero-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
+  height: 85vh;
+  gap: 20px;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 600px;
+  z-index: 5;
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  margin-bottom: 20px;
+}
+
+.main-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #f8fafc;
+  margin-bottom: 20px;
+}
+
+.accent-text {
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.main-description {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 35px;
+}
+
+/* --- BUTTONS --- */
+.btn-primary, .btn-secondary {
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: inline-block;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: #38bdf8;
+  color: #020617;
+}
+
+.btn-secondary {
+  background: rgba(30, 41, 59, 0.5);
+  color: #f8fafc;
+  border: 1px solid #334155 !important;
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2); }
+.btn-secondary:hover { background: rgba(51, 65, 85, 0.8); }
+
+/* --- VISUALS --- */
+.hero-graphic {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.glow-sphere {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  animation: floatSphere 6s ease-in-out infinite;
+}
+
+.float-tag {
+  position: absolute;
+  padding: 10px 18px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.85rem;
+  backdrop-filter: blur(8px);
+  animation: floatSphere 5s ease-in-out infinite;
+}
+
+.t1 { top: 20%; right: 10%; animation-delay: 1s; }
+.t2 { bottom: 25%; left: 5%; animation-delay: 0.5s; }
+
+@keyframes floatSphere {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.pulse-dot {
+  height: 8px;
+  width: 8px;
+  background-color: #38bdf8;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 10px #38bdf8;
+}
+
+/* --- BENTO BOX (Used in Search & Resume Tailor) --- */
+.bento-box {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--slate-border);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+}
+
+/* --- COLLAPSED STATE FIXES --- */
+.app-container.collapsed .sidebar {
+  width: 80px;
+  min-width: 80px;
+}
+.app-container.collapsed .nav-item span:last-child {
+  display: none;
+}

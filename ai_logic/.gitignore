@@ -1,0 +1,6 @@
+# Add these to the .gitignore in ai-career-system/
+ai_logic/venv/
+**/venv/
+venv/
+*.pyc
+__pycache__/
