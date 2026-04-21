@@ -28,7 +28,25 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const https = require('https');
 
 // --- MIDDLEWARE ---
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+// Add your future Vercel/Netlify URL here once you have it
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://your-frontend-name.vercel.app', // placeholder for now
+  'https://your-frontend-name.netlify.app' // placeholder for now
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow local development and your specific production frontend
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS blocked: This origin is not allowed.'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use(session({

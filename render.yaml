@@ -1,0 +1,28 @@
+services:
+  # Backend Server
+  - type: web
+    name: career-ai-backend
+    env: node
+    plan: free
+    buildCommand: npm install && pip install -r ai_logic/requirements.txt
+    startCommand: node server/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20.20.0
+      - key: MONGO_URI
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+  # Frontend Client
+  - type: web
+    name: career-ai-frontend
+    env: static
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://career-ai-backend.onrender.com
