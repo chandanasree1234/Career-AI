@@ -13,7 +13,7 @@ const Dashboard = () => {
     const fetchHistory = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:5000/api/history', {
+        const res = await axios.get('https://career-ai-3sn6.onrender.com/api/history', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setHistory(res.data);
@@ -37,7 +37,7 @@ const Dashboard = () => {
         const token = localStorage.getItem('token');
         
         // 2. BACKEND API CALL
-        await axios.delete(`http://localhost:5000/api/history/${id}`, {
+        await axios.delete(`https://career-ai-3sn6.onrender.com/api/history/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

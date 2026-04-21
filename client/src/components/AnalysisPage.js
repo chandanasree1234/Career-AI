@@ -62,7 +62,7 @@ const AnalysisPage = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const url = id ? `http://localhost:5000/api/history/${id}` : `http://localhost:5000/api/history`;
+        const url = id ? `https://career-ai-3sn6.onrender.com/api/history/${id}` : `https://career-ai-3sn6.onrender.com/api/history`;
         const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
         const record = id ? res.data : (res.data[0] || null);
         setLatestData(record);

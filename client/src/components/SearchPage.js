@@ -27,7 +27,7 @@ const SearchPage = () => {
 
     try {
       // API call to generate recommendation and save to history
-      const response = await axios.post('http://localhost:5000/api/recommend', 
+      const response = await axios.post('https://career-ai-3sn6.onrender.com/api/recommend', 
         { 
           skills: skills,
           userId: user?.id || user?._id 

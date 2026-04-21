@@ -4,7 +4,7 @@ import './login.css';
 const LoginPage = () => {
   const handleGoogleLogin = () => {
     // Original redirect logic
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = "https://career-ai-3sn6.onrender.com/auth/google";
   };
 
   return (

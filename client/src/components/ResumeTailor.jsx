@@ -12,7 +12,7 @@ const ResumeTailor = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/resume/analyze', 
+      const res = await axios.post('https://career-ai-3sn6.onrender.com/api/resume/analyze', 
         { resumeText: resume, jdText: jd },
         { headers: { Authorization: `Bearer ${token}` } }
       );

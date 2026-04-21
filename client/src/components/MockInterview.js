@@ -24,7 +24,7 @@ const MockInterview = () => {
     const fetchContext = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:5000/api/history', {
+        const res = await axios.get('https://career-ai-3sn6.onrender.com/api/history', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.length > 0) setHistoryContext(res.data[0]);
@@ -75,7 +75,7 @@ const MockInterview = () => {
        JSON: {"explanation": "...", "isFinal": false}`;
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat', {
+      const response = await fetch('https://career-ai-3sn6.onrender.com/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ message: evalPrompt }),

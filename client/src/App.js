@@ -27,7 +27,7 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/current_user', { withCredentials: true });
+        const response = await axios.get('https://career-ai-3sn6.onrender.com/api/current_user', { withCredentials: true });
         if (response.data) {
           localStorage.setItem('user', JSON.stringify(response.data));
         }
