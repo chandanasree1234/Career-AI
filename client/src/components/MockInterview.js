@@ -16,7 +16,7 @@ const MockInterview = () => {
   const [score, setScore] = useState(0);
   const [isAnswered, setIsAnswered] = useState(false); 
   const [selectedOption, setSelectedOption] = useState(null); 
-  const [userAnswers, setUserAnswers] = useState([]); // Stores performance data
+  const [userAnswers, setUserAnswers] = useState([]); 
 
   const chatEndRef = useRef(null);
 
@@ -46,19 +46,23 @@ const MockInterview = () => {
     setIsAnswered(false);
     setUserAnswers([]);
     setSelectedOption(null);
+    setMessages([]); // Clear previous chat
 
-    const initialPrompt = `Conduct a 5-question technical MCQ exam for a ${historyContext.recommendation} role.
+    // Stricter prompt for 10 questions and pure JSON
+    const initialPrompt = `You are a Technical Interviewer. Conduct a 10-question MCQ exam for a ${historyContext.recommendation} role. 
     Focus on: ${historyContext.missingSkills.join(", ")}.
-    Output MUST be JSON: {"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "isFinal": false}`;
+    Rules: 
+    1. Provide ONLY Question 1 now.
+    2. Format MUST be a valid JSON object.
+    JSON Structure: {"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "isFinal": false}`;
 
     await handleSendMessage(initialPrompt, true);
   };
 
-  // --- UPDATED CLICK HANDLER ---
   const onOptionClick = (opt) => {
     if (loading || isAnswered) return; 
-    setSelectedOption(opt); // Mark the circle immediately
-    handleSendMessage(opt); // Send to AI
+    setSelectedOption(opt); 
+    handleSendMessage(opt); 
   };
 
   const handleSendMessage = async (msgText, isSystem = false) => {
@@ -70,12 +74,9 @@ const MockInterview = () => {
     setMessages(prev => [...prev, { text: "", sender: "ai" }]);
     setLoading(true);
 
-    // We tell the AI strictly how to respond so our JSON parser doesn't break
     const evalPrompt = isSystem ? msgText : 
-      `User selected: ${msgText}. 
-       1. State if CORRECT or WRONG.
-       2. Provide a 1-line explanation.
-       JSON format: {"explanation": "CORRECT/WRONG: [Your explanation]", "isFinal": false}`;
+      `User Answer: ${msgText}. Evaluate if CORRECT or WRONG. Provide feedback in 1 line. 
+       JSON format: {"explanation": "...", "isFinal": false}`;
 
     try {
       const response = await fetch('https://career-ai-3sn6.onrender.com/api/chat', {
@@ -101,42 +102,36 @@ const MockInterview = () => {
         });
       }
 
-      // --- SCORING LOGIC ---
-      // After the stream finishes, we check if the AI said "CORRECT"
       if (!isSystem) {
         if (aiResponse.toUpperCase().includes("CORRECT")) {
-          setScore(s => s + 1);
-          setUserAnswers(prev => [...prev, { status: "Correct" }]);
+            setScore(prev => prev + 1);
+            setUserAnswers(prev => [...prev, { status: "Correct" }]);
         } else {
-          setUserAnswers(prev => [...prev, { status: "Wrong" }]);
+            setUserAnswers(prev => [...prev, { status: "Wrong" }]);
         }
         setIsAnswered(true); 
       }
-    } catch (err) { 
-      console.error(err); 
-    } finally { 
-      setLoading(false); 
-    }
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   const loadNextQuestion = async () => {
     setIsAnswered(false);
-    setSelectedOption(null); // Reset marking for new question
+    setSelectedOption(null); 
     setLoading(true);
     const nextNum = questionCount + 1;
     
     let nextPrompt = "";
-    if (nextNum > 5) {
+    if (nextNum > 10) { // Updated to 10
         const summaryData = userAnswers.map((a, i) => `Q${i+1}: ${a.status}`).join(", ");
-        nextPrompt = `Exam over. Results: ${summaryData}. Total: ${score}/5. 
-        Provide a technical analysis and career feedback strictly within 6 lines.
-        Set "isFinal": true. JSON: {"question": "Feedback text", "isFinal": true}`;
+        nextPrompt = `Exam over. Results: ${summaryData}. Total Score: ${score}/10. 
+        Provide a career gap analysis based on these results.
+        Set "isFinal": true. JSON: {"question": "Your feedback text...", "isFinal": true}`;
     } else {
-        nextPrompt = `Provide NEW technical MCQ for Question ${nextNum} of 5. 
-        JSON: {"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "isFinal": false}`;
+        nextPrompt = `Provide Technical MCQ for Question ${nextNum} of 10. 
+        Format MUST be JSON: {"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "isFinal": false}`;
     }
 
-    setQuestionCount(nextNum > 5 ? 5 : nextNum);
+    setQuestionCount(nextNum > 10 ? 10 : nextNum);
     await handleSendMessage(nextPrompt, true);
   };
 
@@ -146,7 +141,7 @@ const MockInterview = () => {
         <div className="chat-header">
           <div className="header-info">
             <h2>Technical MCQ Exam</h2>
-            {isStarted && <span className="target-badge">Q: {questionCount} / 5</span>}
+            {isStarted && <span className="target-badge">Q: {questionCount} / 10</span>}
           </div>
           <button className="exit-tab" onClick={() => navigate('/dashboard')}>Exit Exam ✖</button>
         </div>
@@ -154,7 +149,8 @@ const MockInterview = () => {
         {!isStarted ? (
           <div className="interview-start-container" style={{ textAlign: 'center', padding: '60px' }}>
             <div style={{ fontSize: '5rem', marginBottom: '20px' }}>📄</div>
-            <h3 style={{ color: 'white' }}>5-Question Assessment</h3>
+            <h3 style={{ color: 'white' }}>10-Question Technical Assessment</h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '30px' }}>Test your knowledge based on your skill analysis.</p>
             <button onClick={startInterview} className="btn-primary">Begin MCQ Test</button>
           </div>
         ) : (
@@ -162,13 +158,18 @@ const MockInterview = () => {
             {messages.map((m, i) => {
               const isAI = m.sender === "ai";
               let mcqData = null;
+              
               if (isAI) {
                 try {
+                  // This cleans the AI response to extract only the JSON part
                   const jsonMatch = m.text.match(/\{[\s\S]*\}/);
                   if (jsonMatch) mcqData = JSON.parse(jsonMatch[0]);
                 } catch (e) { mcqData = null; }
               }
 
+              // If it's a user message, we show it normally. 
+              // If it's an AI message but NOT valid JSON, we show it as markdown.
+              // If it's AI message and valid JSON, we show the Quiz UI.
               return (
                 <div key={i} className={`msg ${m.sender}`}>
                   {mcqData ? (
@@ -180,47 +181,48 @@ const MockInterview = () => {
                       )}
 
                       {!mcqData.isFinal ? (
-                        <>
-                          {mcqData.question && <p className="question-text"><b>{mcqData.question}</b></p>}
-                          <div className="options-grid">
+                        <div className="quiz-content">
+                          {mcqData.question && <p className="question-text" style={{fontSize: '1.1rem', marginBottom: '20px'}}><b>{mcqData.question}</b></p>}
+                          <div className="options-grid" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '10px'}}>
                             {mcqData.options && mcqData.options.map((opt, idx) => (
                               <button 
                                 key={idx} 
                                 className={`select-option glass-btn ${selectedOption === opt ? 'marked' : ''}`} 
                                 disabled={isAnswered && i === messages.length - 1}
                                 onClick={() => onOptionClick(opt)}
+                                style={{textAlign: 'left', padding: '15px', borderRadius: '10px'}}
                               >
-                                <div className="option-tab"></div>
-                                <span className="option-text">{opt}</span>
+                                {opt}
                               </button>
                             ))}
                           </div>
-                        </>
+                        </div>
                       ) : (
-                        <div className="final-results">
-                          <h3 style={{ color: 'white' }}>Final Analysis</h3>
-                          <h1 style={{ color: '#38bdf8', fontSize: '3.5rem' }}>{score} / 5</h1>
-                          <div className="analysis-summary">
+                        <div className="final-results" style={{textAlign: 'center', padding: '20px'}}>
+                          <h3 style={{ color: 'white' }}>Assessment Complete</h3>
+                          <h1 style={{ color: '#38bdf8', fontSize: '4rem', margin: '20px 0' }}>{score} / 10</h1>
+                          <div className="analysis-summary" style={{textAlign: 'left', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '15px'}}>
                             <ReactMarkdown>{mcqData.question}</ReactMarkdown>
                           </div>
                           <div style={{display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '30px'}}>
-                            <button onClick={startInterview} className="professional-gen-btn">Retake</button>
-                            <button onClick={() => navigate('/dashboard')} className="professional-gen-btn" style={{background: 'rgba(255,255,255,0.1)'}}>Exit</button>
+                            <button onClick={startInterview} className="btn-primary">Retake Test</button>
+                            <button onClick={() => navigate('/dashboard')} className="btn-primary" style={{background: 'rgba(255,255,255,0.1)'}}>Return Home</button>
                           </div>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <ReactMarkdown>{m.text}</ReactMarkdown>
+                    // This hides the raw JSON from appearing as a plain text message
+                    !isAI || !m.text.includes("{") ? <ReactMarkdown>{m.text}</ReactMarkdown> : null
                   )}
                 </div>
               );
             })}
             
-            {isAnswered && questionCount <= 5 && !loading && (
+            {isAnswered && questionCount <= 10 && !loading && (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-                <button onClick={loadNextQuestion} className="next-btn">
-                  {questionCount === 5 ? "Finish & Analyze 🏁" : "Next Question ➡️"}
+                <button onClick={loadNextQuestion} className="next-btn" style={{padding: '12px 30px', borderRadius: '30px', background: '#38bdf8', color: 'black', fontWeight: 'bold', border: 'none', cursor: 'pointer'}}>
+                  {questionCount === 10 ? "Show Final Score 🏁" : "Next Question ➡️"}
                 </button>
               </div>
             )}
