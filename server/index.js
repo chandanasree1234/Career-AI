@@ -345,4 +345,22 @@ app.get('/api/current_user', (req, res) => {
   res.send(req.user);
 });
 
+// Add this to your backend routes
+app.delete('/api/history/:id', protect, async (req, res) => {
+    try {
+        const deletedItem = await Career.findOneAndDelete({ 
+            _id: req.params.id, 
+            userId: req.user.id // Ensures users can only delete their own history
+        });
+
+        if (!deletedItem) {
+            return res.status(404).json({ message: "Item not found" });
+        }
+
+        res.json({ message: "History deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Server error during deletion" });
+    }
+});
+
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));

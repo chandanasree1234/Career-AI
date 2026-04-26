@@ -28,25 +28,31 @@ const Dashboard = () => {
   }, [navigate]);
 
   // --- DELETE FUNCTION ---
+  // --- DELETE FUNCTION ---
   const deleteHistory = async (id, e) => {
-    // 1. STOP PROPAGATION: Crucial step to prevent opening analysis page
+    // Stop the click from opening the roadmap page
     e.stopPropagation(); 
     
     if (window.confirm("Are you sure you want to delete this analysis?")) {
       try {
         const token = localStorage.getItem('token');
         
-        // 2. BACKEND API CALL
+        // Ensure the URL matches your backend route exactly
         await axios.delete(`https://career-ai-3sn6.onrender.com/api/history/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // 3. UI UPDATE: Filter state
-        setHistory((prevHistory) => prevHistory.filter(item => item._id !== id));
+        // Update UI immediately
+        setHistory(history.filter(item => item._id !== id));
         
       } catch (err) {
         console.error("Delete failed:", err);
-        alert("Failed to delete. Please check your connection.");
+        // If the error is 404, the item might already be gone, so remove it from UI anyway
+        if (err.response?.status === 404) {
+           setHistory(history.filter(item => item._id !== id));
+        } else {
+           alert("Could not delete. Make sure your backend route is set up.");
+        }
       }
     }
   };
