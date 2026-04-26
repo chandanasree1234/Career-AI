@@ -70,9 +70,12 @@ const MockInterview = () => {
     setMessages(prev => [...prev, { text: "", sender: "ai" }]);
     setLoading(true);
 
+    // We tell the AI strictly how to respond so our JSON parser doesn't break
     const evalPrompt = isSystem ? msgText : 
-      `User Answer: ${msgText}. Evaluate if CORRECT or WRONG. Provide feedback in max 2 lines. 
-       JSON: {"explanation": "...", "isFinal": false}`;
+      `User selected: ${msgText}. 
+       1. State if CORRECT or WRONG.
+       2. Provide a 1-line explanation.
+       JSON format: {"explanation": "CORRECT/WRONG: [Your explanation]", "isFinal": false}`;
 
     try {
       const response = await fetch('https://career-ai-3sn6.onrender.com/api/chat', {
@@ -91,21 +94,29 @@ const MockInterview = () => {
         const chunk = decoder.decode(value, { stream: true });
         aiResponse += chunk;
 
-        if (chunk.toUpperCase().includes("CORRECT")) {
-            setScore(prev => prev + 1);
-            if(!isSystem) setUserAnswers(prev => [...prev, { status: "Correct" }]);
-        } else if (chunk.toUpperCase().includes("WRONG")) {
-            if(!isSystem) setUserAnswers(prev => [...prev, { status: "Wrong" }]);
-        }
-
         setMessages(prev => {
           const updated = [...prev];
           updated[updated.length - 1].text = aiResponse;
           return updated;
         });
       }
-      setIsAnswered(true); 
-    } catch (err) { console.error(err); } finally { setLoading(false); }
+
+      // --- SCORING LOGIC ---
+      // After the stream finishes, we check if the AI said "CORRECT"
+      if (!isSystem) {
+        if (aiResponse.toUpperCase().includes("CORRECT")) {
+          setScore(s => s + 1);
+          setUserAnswers(prev => [...prev, { status: "Correct" }]);
+        } else {
+          setUserAnswers(prev => [...prev, { status: "Wrong" }]);
+        }
+        setIsAnswered(true); 
+      }
+    } catch (err) { 
+      console.error(err); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const loadNextQuestion = async () => {
