@@ -31,8 +31,7 @@ const https = require('https');
 // Add your future Vercel/Netlify URL here once you have it
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://career-ai-recommendation.netlify.app',
-  'https://career-ai-recommendation.vercel.app/',// ADD YOUR NETLIFY URL HERE
+  'https://career-ai-recommendation.vercel.app',// ADD YOUR NETLIFY URL HERE
 ];
 
 app.use(cors({
