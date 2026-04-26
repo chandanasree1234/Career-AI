@@ -201,12 +201,9 @@ const MockInterview = () => {
                         <div className="final-results" style={{textAlign: 'center', padding: '20px'}}>
                           <h3 style={{ color: 'white' }}>Assessment Complete</h3>
                           <h1 style={{ color: '#38bdf8', fontSize: '4rem', margin: '20px 0' }}>{score} / 10</h1>
-                          <div className="analysis-summary" style={{textAlign: 'left', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '15px'}}>
-                            <ReactMarkdown>{mcqData.question}</ReactMarkdown>
-                          </div>
                           <div style={{display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '30px'}}>
                             <button onClick={startInterview} className="btn-primary">Retake Test</button>
-                            <button onClick={() => navigate('/dashboard')} className="btn-primary" style={{background: 'rgba(255,255,255,0.1)'}}>Return Home</button>
+                            <button onClick={() => navigate('/home')} className="btn-primary" style={{background: 'rgba(255,255,255,0.1)'}}>Return Home</button>
                           </div>
                         </div>
                       )}
