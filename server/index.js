@@ -303,23 +303,42 @@ app.post('/api/resume/analyze', protect, async (req, res) => {
 // --- 6. CONTEXT-AWARE CHAT ---
 app.post('/api/chat', protect, async (req, res) => {
     const { message } = req.body;
+    
     try {
         const latestAnalysis = await Career.findOne({ userId: req.user.id }).sort({ date: -1 });
+        
         let systemContext = "You are a professional Career Coach AI assistant.";
         if (latestAnalysis) {
             systemContext += ` The user is aiming for: ${latestAnalysis.recommendation}. Skills: ${latestAnalysis.skills}. Gaps: ${latestAnalysis.missingSkills.join(", ")}.`;
         }
+
         const chatCompletion = await groq.chat.completions.create({
-            messages: [{ role: "system", content: systemContext }, { role: "user", content: message }],
+            messages: [
+                { role: "system", content: systemContext },
+                { role: "user", content: message }
+            ],
             model: "llama-3.3-70b-versatile",
             stream: true,
         });
-        res.setHeader('Content-Type', 'text/plain');
+
+        // Use 'text/event-stream' for better compatibility with Render/Netlify streaming
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
         for await (const chunk of chatCompletion) {
-            res.write(chunk.choices[0]?.delta?.content || ""); 
+            const content = chunk.choices[0]?.delta?.content || "";
+            res.write(content); 
         }
+        
         res.end(); 
-    } catch (error) { res.status(500).json({ error: "AI processing error" }); }
+
+    } catch (error) { 
+        console.error("GROQ ERROR:", error); // This prints the REAL error in your Render logs
+        if (!res.headersSent) {
+            res.status(500).json({ error: "AI Service encountered error" });
+        }
+    }
 });
 
 app.get('/api/current_user', (req, res) => {
